@@ -154,12 +154,16 @@ class Net(nn.Module):
             nn.Conv2d(in_channels=256, out_channels=256, kernel_size=(3,3)),
             nn.ReLU(),
             nn.BatchNorm2d(num_features=256),
+
+            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=(3,3)),
+            nn.ReLU(),
+            nn.BatchNorm2d(num_features=256),
             
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2))
         )
 
         self.classifier = nn.Sequential(
-            nn.Linear(in_features=256 * 14 * 14, out_features=512),
+            nn.Linear(in_features=256 * 13 * 13, out_features=512),
             nn.ReLU(),
             nn.BatchNorm1d(num_features=512),
             nn.Dropout(0.5),
@@ -177,7 +181,7 @@ class Net(nn.Module):
         x = self.features(x)
         x = x.view(x.shape[0], -1) 
         output = self.classifier(x)
-        return output  
+        return output
 
 
 def count_parameters(model):
@@ -249,7 +253,7 @@ print(f"The number of parameters: {count_parameters(model)}")
 print("Defining Learning Rate Scheduler")
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=SCHEDULER_PATIENCE, factor=SCHEDULER_FACTOR, min_lr=MIN_LR,  verbose=True)
 
-if (False):
+if (True):
     x = images.to(device)
     x = model.features(x)
     print(x.shape)
