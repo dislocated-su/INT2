@@ -14,6 +14,7 @@ import PIL
 
 if (torch.cuda.is_available()):
     torch.cuda.empty_cache()
+    print("GPU WORKING!")
 
 
 with open("flower_classes.json", "r") as f:
@@ -33,6 +34,10 @@ EPOCHS = 60
 LEARNING_RATE =0.005
 MOMENTUM=0.9
 WEIGHT_DECAY=0.000001
+# For lr Scheduler
+SCHEDULER_PATIENCE=5
+SCHEDULER_FACTOR= 0.2
+MIN_LR = 0.000001
 
 def imshow(img, title=None):
   ''' function to show image '''
@@ -239,19 +244,15 @@ criterion = nn.CrossEntropyLoss()
 
 model = model.to(device)
 criterion = criterion.to(device)
-num_of_parms = count_parameters(model)
-print(f"The number of parmeters: {num_of_parms}")
+print(f"The number of parameters: {count_parameters(model)}")
+
+print("Defining Learning Rate Scheduler")
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=SCHEDULER_PATIENCE, factor=SCHEDULER_FACTOR, min_lr=MIN_LR,  verbose=True)
 
 if (False):
     x = images.to(device)
     x = model.features(x)
     print(x.shape)
-
-
-epoch_loss, epoch_acc = train(model, trainloader, optimizer, criterion, device)
-
-print(epoch_loss)
-print(epoch_acc)
 
 best_valid_loss = float('inf')
 useful_info_dict = {
@@ -266,6 +267,8 @@ for epoch in tqdm(range(EPOCHS), desc="EPOCH PROGRESS:"):
 
     train_loss, train_acc = train(model, trainloader, optimizer, criterion, device)
     valid_loss, valid_acc = testing(model, validloader, criterion, device)
+
+    scheduler.step(valid_loss)
 
     if valid_loss < best_valid_loss:
       best_valid_loss = valid_loss
@@ -297,17 +300,11 @@ def plot_loss_and_acc(useful_info):
     fig, axs = plt.subplots(2)
 
     (ax_loss, ax_acc) = axs
-    #fig.title("Loss and accuracy over epochs")
 
     train_loss_line = ax_loss.plot(train_loss, label="Train loss")
     train_acc_line = ax_acc.plot(train_acc, label="Train accuracy")
     val_loss_line = ax_loss.plot(val_loss, label="Valid loss")
     val_acc_line = ax_acc.plot(val_acc, label="Valid accuracy")
-    
-    # train_loss_line.set_label("Train Loss")
-    # train_acc_line.set_label("Train Accuracy")
-    # val_loss_line.set_label("Valid Loss")
-    # val_acc_line.set_label("Valid Accuracy")
     
     fig.legend()
     
