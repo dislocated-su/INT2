@@ -154,16 +154,20 @@ class Net(nn.Module):
             nn.BatchNorm2d(num_features=256),
 
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2)),
-            
-            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=(3,3)),
+
+            nn.Conv2d(in_channels=256, out_channels=512, kernel_size=(3,3)),
             nn.ReLU(),
-            nn.BatchNorm2d(num_features=256),
+            nn.BatchNorm2d(num_features=512),
+
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=(3,3)),
+            nn.ReLU(),
+            nn.BatchNorm2d(num_features=512),
             
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2))
         )
 
         self.classifier = nn.Sequential(
-            nn.Linear(in_features=256 * 13 * 13, out_features=512),
+            nn.Linear(in_features=512 * 12 * 12, out_features=512),
             nn.ReLU(),
             nn.BatchNorm1d(num_features=512),
             nn.Dropout(0.5),
