@@ -28,7 +28,7 @@ classes = list(classes.values())
 means, stds = (0.436, 0.378, 0.288), (0.265, 0.212, 0.219)
 
 batch_size = 32
-EPOCHS = 60
+EPOCHS = 100
 
 # for SGD
 LEARNING_RATE =0.005
@@ -134,46 +134,68 @@ class Net(nn.Module):
         super(Net, self).__init__() 
         self.features = nn.Sequential (
             nn.Conv2d(in_channels=num_channels, out_channels=64, kernel_size=(3,3)),
-            nn.ReLU(),
             nn.BatchNorm2d(num_features=64),
+            nn.ReLU(),
 
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2)),
             
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(3,3)),
-            nn.ReLU(),
             nn.BatchNorm2d(num_features=128),
+            nn.ReLU(),
 
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2)),
             
             nn.Conv2d(in_channels=128, out_channels=256, kernel_size=(3,3)),
-            nn.ReLU(),
             nn.BatchNorm2d(num_features=256),
+            nn.ReLU(),
 
             nn.Conv2d(in_channels=256, out_channels=256, kernel_size=(3,3)),
-            nn.ReLU(),
             nn.BatchNorm2d(num_features=256),
+            nn.ReLU(),
+
+            nn.Conv2d(in_channels=256, out_channels=256, kernel_size=(1,1)),
+            nn.BatchNorm2d(num_features=256),
+            nn.ReLU(),
 
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2)),
 
             nn.Conv2d(in_channels=256, out_channels=512, kernel_size=(3,3)),
-            nn.ReLU(),
             nn.BatchNorm2d(num_features=512),
+            nn.ReLU(),
 
             nn.Conv2d(in_channels=512, out_channels=512, kernel_size=(3,3)),
-            nn.ReLU(),
             nn.BatchNorm2d(num_features=512),
+            nn.ReLU(),
+
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=(1,1)),
+            nn.BatchNorm2d(num_features=512),
+            nn.ReLU(),
+
+            nn.MaxPool2d(kernel_size=(2,2), stride=(2,2)),
+
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=(3,3)),
+            nn.BatchNorm2d(num_features=512),
+            nn.ReLU(),
+
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=(3,3)),
+            nn.BatchNorm2d(num_features=512),
+            nn.ReLU(),
             
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=(1,1)),
+            nn.BatchNorm2d(num_features=512),
+            nn.ReLU(),
+
             nn.MaxPool2d(kernel_size=(2,2), stride=(2,2))
         )
 
         self.classifier = nn.Sequential(
-            nn.Linear(in_features=512 * 12 * 12, out_features=512),
-            nn.ReLU(),
+            nn.Linear(in_features=512 * 4 * 4, out_features=512),
             nn.BatchNorm1d(num_features=512),
+            nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(in_features=512, out_features=256),
-            nn.ReLU(),
             nn.BatchNorm1d(num_features=256),
+            nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(in_features=256, out_features=classes),
             nn.ReLU(),
