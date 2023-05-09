@@ -33,7 +33,7 @@ def rgb2hsvTransform(image: PIL.Image.Image) -> PIL.Image.Image:
 def get_datasets(batch_size):
     # base transform
     transform_base = transforms.Compose([
-        transforms.Lambda(crop_to_longest_side),
+        #transforms.Lambda(crop_to_longest_side),
         #transforms.Lambda(rgb2hsvTransform),
         transforms.Resize((256,256)), 
         transforms.ToTensor(), # to tensor object
@@ -56,7 +56,7 @@ def get_datasets(batch_size):
         transform_base,
         transforms.RandomHorizontalFlip(0.5),
         transforms.RandomVerticalFlip(0.5),
-        AddGaussianNoise(0, 0.4),
+        #AddGaussianNoise(0, 0.4),
         transforms.GaussianBlur(kernel_size=9), 
         ])
 

@@ -4,7 +4,6 @@ import sys, torch, json
 import torch.nn as nn # basic building block for neural neteorks
 import torch.nn.functional as F # import convolution functions like Relu
 import torch.optim as optim # optimzer
-from transforms import unnormalize
 
 
 def progressbar(it, desc="", size=60, out=sys.stdout): # Python3.3+
@@ -73,11 +72,11 @@ def images_to_probs(net, images):
     output = net(images)
     # convert output probabilities to predicted class
     _, preds_tensor = torch.max(output, 1)
-    preds = np.squeeze(preds_tensor.numpy())
+    preds = np.squeeze(preds_tensor.cpu().numpy())
     return preds, [F.softmax(el, dim=0)[i].item() for i, el in zip(preds, output)]
 
 
-def plot_classes_preds(net, images, labels, classes):
+def plot_classes_preds(net, images, labels, classes, size):
     '''
     Generates matplotlib Figure using a trained network, along with images
     and labels from a batch, that shows the network's top prediction along
@@ -86,11 +85,14 @@ def plot_classes_preds(net, images, labels, classes):
     Uses the "images_to_probs" function.
     '''
     preds, probs = images_to_probs(net, images)
+    images = images.cpu()
+    labels = labels.cpu()
     # plot the images in the batch, along with predicted and true labels
-    fig = plt.figure(figsize=(12, 48))
-    for idx in np.arange(4):
-        ax = fig.add_subplot(1, 4, idx+1, xticks=[], yticks=[])
-        ax.imshow(images[idx], one_channel=True)
+    fig = plt.figure(figsize=(12, 12))
+    for idx in np.arange(size):
+        ax = fig.add_subplot(1, size, idx+1, xticks=[], yticks=[])
+        image = np.transpose(images[idx], (1, 2, 0))
+        ax.imshow(normalize_image(image))
         ax.set_title("{0}, {1:.1f}%\n(label: {2})".format(
             classes[preds[idx]],
             probs[idx] * 100.0,
@@ -133,3 +135,13 @@ def plot_images(images, labels, classes, normalize = True):
     
     return fig
 
+def display_matrix(pred_dict):
+    fig = plt.figure(figsize = (15, 15))
+    ax = fig.add_subplot()
+    matrix = np.zeros((102, 102))
+    
+    for label  in pred_dict:
+        for pred in pred_dict[label]:
+            matrix[label][pred.item()] += 1
+    ax.matshow(matrix)
+    return fig

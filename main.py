@@ -67,6 +67,11 @@ def train(model, iterator, optimizer, criterion, device, epoch):
 def test(model, iterator, criterion, device, valid=True):
   total_loss = 0
   total_acc = 0
+  
+  preds_dict = {}
+  for i in range(102):
+      preds_dict[i] = []
+      
   model.eval()
   with torch.no_grad():
     for images, labels in iterator:
@@ -74,16 +79,27 @@ def test(model, iterator, criterion, device, valid=True):
       labels = labels.to(device)
 
       pred_y= model.forward(images)
-
+      for y_p, y_l in zip(pred_y, labels):
+          preds_dict[y_l.cpu().item()].append(torch.argmax(y_p).cpu())
       loss = criterion(pred_y, labels)
       acc = lib.calculate_accuracy(pred_y, labels)
 
       total_loss += float(loss.cpu())
       total_acc += float(acc.cpu())
+      
+    
+    
+    writer.add_figure("confusion matrix", lib.display_matrix(preds_dict))
     
     # if not valid:
     #     writer.add_figure(f'predictions vs. actuals acc{total_acc / len(iterator)}', lib.plot_classes_preds(model, images, pred_y, classes), global_step=epoch)
     return total_loss / len(iterator), total_acc / len(iterator)
+
+def add_pred_images_tensor_board(model, iterator, classes, device):
+    images, labels = next(iter(iterator))
+    images = images.to(device)
+    labels = labels.to(device)
+    writer.add_figure('predictions vs. actuals', lib.plot_classes_preds(model, images, labels, classes, 4))
 
 def testing(model, testloader, criterion, device):
     print("Testing...")
@@ -199,5 +215,9 @@ if __name__ == '__main__':
     else:
         testing(model, testloader, criterion, device)
     
+    testing(model, testloader, criterion, device)
+    
+    add_pred_images_tensor_board(model, testloader, classes, device)
     writer.add_figure("loss and acc", lib.plot_loss_and_acc(log))
+    
     print("Finished")
