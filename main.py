@@ -19,15 +19,15 @@ if (torch.cuda.is_available()):
 #Hyper parameters
 batch_size = 16
 gradient_accumulations = 4
-EPOCHS = 100
+EPOCHS = 250
 
 # for SGD
 LEARNING_RATE =0.01
-MOMENTUM=0.95
+MOMENTUM=0.97
 WEIGHT_DECAY=0.005
 # For lr Scheduler
 SCHEDULER_PATIENCE=5
-SCHEDULER_FACTOR= 0.2
+SCHEDULER_FACTOR= 0.1
 MIN_LR = 0.0000001
 
 scaler = GradScaler()
@@ -64,7 +64,7 @@ def train(model, iterator, optimizer, criterion, device, epoch):
             
     return epoch_loss / len(iterator), epoch_acc / len(iterator)
 
-def test(model, iterator, criterion, device):
+def test(model, iterator, criterion, device, valid=True):
   total_loss = 0
   total_acc = 0
   model.eval()
@@ -81,13 +81,14 @@ def test(model, iterator, criterion, device):
       total_loss += float(loss.cpu())
       total_acc += float(acc.cpu())
     
-    #writer.add_figure('predictions vs. actuals', lib.plot_classes_preds(model, unnormalize(x), y, classes), global_step=epoch)
+    # if not valid:
+    #     writer.add_figure(f'predictions vs. actuals acc{total_acc / len(iterator)}', lib.plot_classes_preds(model, images, pred_y, classes), global_step=epoch)
     return total_loss / len(iterator), total_acc / len(iterator)
 
 def testing(model, testloader, criterion, device):
     print("Testing...")
     model.load_state_dict(torch.load('best-model.pt'))
-    testing_loss, testing_acc = test(model, testloader, criterion, device)
+    testing_loss, testing_acc = test(model, testloader, criterion, device, valid=False)
 
     print(f"\tTesting Loss : {testing_loss}| Testing Acc: {testing_acc}")
 
@@ -149,7 +150,7 @@ if __name__ == '__main__':
     print("Defining Learning Rate Scheduler")
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=SCHEDULER_PATIENCE, factor=SCHEDULER_FACTOR, min_lr=MIN_LR,  verbose=True)
     
-    best_valid_loss = float('inf')
+    best_valid_loss = 3
     log = {
                 "train_loss" : [],
                 "train_acc" : [],

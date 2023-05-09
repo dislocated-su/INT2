@@ -17,9 +17,10 @@ class VGG(nn.Module):
 
         # magic
         self.image_result = 256 // (2 ** arch.count('M'))
+        self.avgpool = nn.AdaptiveAvgPool2d(8)
 
         self.classifier = nn.Sequential(
-            nn.Linear(in_features=512 * (self.image_result ** 2), out_features=512),
+            nn.Linear(in_features=512 * 8 * 8, out_features=512),#(self.image_result ** 2)
             nn.BatchNorm1d(num_features=512),
             nn.ReLU(),
             nn.Dropout(0.5),
@@ -65,6 +66,7 @@ class VGG(nn.Module):
     
     def forward(self, x):
         x = self.features(x)
+        x = self.avgpool(x)
         x = x.view(x.shape[0], -1) 
         output = self.classifier(x)
         return output
