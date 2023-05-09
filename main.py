@@ -22,9 +22,9 @@ gradient_accumulations = 4
 EPOCHS = 100
 
 # for SGD
-LEARNING_RATE =0.005
+LEARNING_RATE =0.01
 MOMENTUM=0.95
-WEIGHT_DECAY=0.001
+WEIGHT_DECAY=0.005
 # For lr Scheduler
 SCHEDULER_PATIENCE=5
 SCHEDULER_FACTOR= 0.2
@@ -115,14 +115,14 @@ if __name__ == '__main__':
     
     # plot images in tensorboard
     
-    train_images, train_labels = zip(*[(image, label) for image, label in
+    train_images_plot, train_labels_plot = zip(*[(image, label) for image, label in
                        [trainloader.dataset[np.random.randint(0, len(trainloader.dataset))] for _ in range(25)]])
     
-    test_images, test_labels = zip(*[(image, label) for image, label in
+    test_images_plot, test_labels_plot = zip(*[(image, label) for image, label in
                        [testloader.dataset[np.random.randint(0, len(testloader.dataset))] for _ in range(25)]])
     
-    writer.add_figure('images train', lib.plot_images(train_images, train_labels, classes))
-    writer.add_figure('images test', lib.plot_images(test_images, test_labels, classes))
+    writer.add_figure('images train', lib.plot_images(train_images_plot, train_labels_plot, classes))
+    writer.add_figure('images test', lib.plot_images(test_images_plot, test_labels_plot, classes))
     
     
     
