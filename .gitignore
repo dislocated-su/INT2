@@ -1,2 +1,4 @@
 data
 best-model.pt
+__pycache__
+runs
