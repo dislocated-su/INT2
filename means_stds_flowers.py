@@ -14,13 +14,29 @@ testsetNotNorm = torchvision.datasets.Flowers102("./data", split="test", downloa
 validsetNotNorm = torchvision.datasets.Flowers102("./data", split="val", download=True, transform=transformToTensor)
 set = U.ConcatDataset([trainsetNotNorm, validsetNotNorm, testsetNotNorm])
 
-means = [0, 0, 0]
-stds = [0, 0, 0]
-for img, _ in set:
-  means = [sum(i) for i in zip(means, img.mean([1, 2]))]
-  stds =  [sum(i) for i in zip(stds, img.std([1, 2]))]
+def get_means_stds_slow(dataset):
+  means = [0, 0, 0]
+  stds = [0, 0, 0]
+  for img, _ in dataset:
+    means = [sum(i) for i in zip(means, img.mean([1, 2]))]
+    stds =  [sum(i) for i in zip(stds, img.std([1, 2]))]
 
-means = np.array(means) / len(set)
-stds = np.array(stds) / len(set)
+  means = np.array(means) / len(set)
+  stds = np.array(stds) / len(set)
 
-print(means, stds)
+  return (means, stds)
+
+def get_means_stds(dataset):
+  means = torch.zeros(3)
+  stds = torch.zeros(3)
+
+  for img, label in dataset:
+      means += torch.mean(img, dim = (1,2))
+      stds += torch.std(img, dim = (1,2))
+
+  means /= len(dataset)
+  stds /= len(dataset)
+      
+  return means, stds
+
+print(get_means_stds(set))
