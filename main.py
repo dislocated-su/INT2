@@ -19,7 +19,7 @@ if (torch.cuda.is_available()):
 #Hyper parameters
 batch_size = 16
 gradient_accumulations = 4
-EPOCHS = 100
+EPOCHS = 150
 
 # for SGD
 LEARNING_RATE =0.01
